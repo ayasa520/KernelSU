@@ -86,15 +86,14 @@ static inline u32 current_sid(void)
 
 bool is_ksu_domain()
 {
-    char *domain;
-    u32 seclen;
+    struct lsm_context ctx = {};
     bool result;
-    int err = security_secid_to_secctx(current_sid(), &domain, &seclen);
+    int err = security_secid_to_secctx(current_sid(), &ctx);
     if (err) {
         return false;
     }
-    result = strncmp(KERNEL_SU_DOMAIN, domain, seclen) == 0;
-    security_release_secctx(domain, seclen);
+    result = strncmp(KERNEL_SU_DOMAIN, ctx.context, ctx.len) == 0;
+    security_release_secctx(&ctx);
     return result;
 }
 
@@ -104,15 +103,14 @@ bool is_zygote(void *sec)
     if (!tsec) {
         return false;
     }
-    char *domain;
-    u32 seclen;
+    struct lsm_context ctx = {};
     bool result;
-    int err = security_secid_to_secctx(tsec->sid, &domain, &seclen);
+    int err = security_secid_to_secctx(tsec->sid, &ctx);
     if (err) {
         return false;
     }
-    result = strncmp("u:r:zygote:s0", domain, seclen) == 0;
-    security_release_secctx(domain, seclen);
+    result = strncmp("u:r:zygote:s0", ctx.context, ctx.len) == 0;
+    security_release_secctx(&ctx);
     return result;
 }
 

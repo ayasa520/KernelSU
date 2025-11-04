@@ -30,6 +30,12 @@ void apply_kernelsu_rules()
 {
     struct policydb *db;
 
+    // Check if SELinux is actually enabled/initialized
+    if (!selinux_state.initialized || !selinux_state.policy) {
+        pr_info("SELinux not initialized or policy not loaded, skipping rules!\n");
+        return;
+    }
+
     if (!getenforce()) {
         pr_info("SELinux permissive or disabled, apply rules!\n");
     }
@@ -192,6 +198,12 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
     struct policydb *db;
 
     if (!arg4) {
+        return -1;
+    }
+
+    // Check if SELinux is actually enabled/initialized
+    if (!selinux_state.initialized || !selinux_state.policy) {
+        pr_info("SELinux not initialized or policy not loaded when handle policy!\n");
         return -1;
     }
 
